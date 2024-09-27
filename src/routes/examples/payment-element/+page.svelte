@@ -1,9 +1,9 @@
 <script>
   import { goto } from '$app/navigation'
-  import { onMount } from 'svelte'
-  import { loadStripe } from '@stripe/stripe-js'
   import { PUBLIC_STRIPE_KEY } from '$env/static/public'
-  import { Elements, PaymentElement, LinkAuthenticationElement, Address } from '$lib'
+  import { Address, Elements, LinkAuthenticationElement, PaymentElement } from '$lib'
+  import { loadStripe } from '@stripe/stripe-js'
+  import { onMount } from 'svelte'
 
   let stripe = null
   let clientSecret = null
@@ -55,6 +55,8 @@
       goto('/examples/payment-element/thanks')
     }
   }
+
+  let show = false
 </script>
 
 <h1>Payment Element Example</h1>
@@ -69,32 +71,36 @@
   <p class="error">{error.message} Please try again.</p>
 {/if}
 
-{#if clientSecret}
-  <Elements
-    {stripe}
-    {clientSecret}
-    theme="flat"
-    labels="floating"
-    variables={{ colorPrimary: '#7c4dff' }}
-    rules={{ '.Input': { border: 'solid 1px #0002' } }}
-    bind:elements
-  >
-    <form on:submit|preventDefault={submit}>
-      <LinkAuthenticationElement />
-      <PaymentElement />
-      <Address mode="billing" />
+<button on:click={() => (show = !show)}>{show ? 'Hide' : 'Show'}</button>
 
-      <button disabled={processing}>
-        {#if processing}
-          Processing...
-        {:else}
-          Pay
-        {/if}
-      </button>
-    </form>
-  </Elements>
-{:else}
-  Loading...
+{#if show}
+  {#if clientSecret}
+    <Elements
+      {stripe}
+      {clientSecret}
+      theme="flat"
+      labels="floating"
+      variables={{ colorPrimary: '#7c4dff' }}
+      rules={{ '.Input': { border: 'solid 1px #0002' } }}
+      bind:elements
+    >
+      <form on:submit|preventDefault={submit}>
+        <LinkAuthenticationElement />
+        <PaymentElement />
+        <Address mode="billing" />
+
+        <button disabled={processing}>
+          {#if processing}
+            Processing...
+          {:else}
+            Pay
+          {/if}
+        </button>
+      </form>
+    </Elements>
+  {:else}
+    Loading...
+  {/if}
 {/if}
 
 <style>
